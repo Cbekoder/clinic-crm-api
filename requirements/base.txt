@@ -3,4 +3,5 @@ drf-yasg
 python-environ
 django-jazzmin
 django-cors-headers
+django-filters
 djangorestframework-simplejwt

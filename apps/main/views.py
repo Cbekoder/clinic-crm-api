@@ -7,15 +7,19 @@ from drf_yasg import openapi
 from datetime import date
 from django.utils.dateparse import parse_date
 
+from .models import Client, Turn, Patient, PatientService
+from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
+    PatientSerializer, PatientServiceSerializer
 
-from .models import Patient, Turn
-from .serializers import PatientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer
+
+class ClientListCreateAPIView(ListCreateAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
 
 
-class PatientListCreateAPIView(ListCreateAPIView):
-    queryset = Patient.objects.all()
-    serializer_class = PatientSerializer
-
+class ClientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
 
 
 class TurnListCreateAPIView(ListCreateAPIView):
@@ -25,7 +29,7 @@ class TurnListCreateAPIView(ListCreateAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['doctor__first_name', 'doctor__last_name',
                      'doctor__room', 'service__name', 'service__room',
-                     'patient__first_name', 'patient__last_name', 'turn_num']
+                     'client__first_name', 'client__last_name', 'turn_num']
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -91,6 +95,24 @@ class TurnCancelAPIView(UpdateAPIView):
             raise ValidationError("This turn is already canceled.")
         serializer.save()
 
+
+class PatientListCreateAPIView(ListCreateAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+
+class PatientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+
+
+class PatientServiceListCreateAPIView(ListCreateAPIView):
+    queryset = PatientService.objects.all()
+    serializer_class = PatientServiceSerializer
+
+
+class PatientServiceRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = PatientService.objects.all()
+    serializer_class = PatientServiceSerializer
 
 
 

@@ -61,6 +61,9 @@ class DoctorCreateView(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = DoctorSerializer
 
+    def get_queryset(self):
+        return self.queryset.filter(position__role='1')
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return DoctorSerializer
@@ -79,6 +82,9 @@ class DoctorCreateView(ListCreateAPIView):
 class NurseCreateView(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = NurseSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(position__role='2')
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -99,6 +105,9 @@ class NurseCreateView(ListCreateAPIView):
 class OtherStaffCreateView(ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = OtherStaffSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(position__role='3')
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

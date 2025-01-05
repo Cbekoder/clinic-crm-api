@@ -2,11 +2,13 @@ from django.db import models, transaction
 from rest_framework.exceptions import ValidationError
 from django.utils.timezone import now
 from datetime import date
-from apps.stuff.models import Service
+
+from apps.common.models import BaseModel
+from apps.stuff.models import Service, Section, Room
 from apps.users.models import User
 
 
-class Patient(models.Model):
+class Client(BaseModel):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     middle_name = models.CharField(max_length=200, null=True, blank=True)
@@ -42,8 +44,8 @@ STATUS_CHOICES = (
     ('canceled', 'Canceled')
 )
 
-class Turn(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+class Turn(BaseModel):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
     doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     price = models.FloatField()
@@ -51,7 +53,6 @@ class Turn(models.Model):
     turn_type = models.CharField(max_length=10, choices=TURN_CHOICE, default='0')
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="new")
     appointment_time = models.DateTimeField(default=now)
-    created_at = models.DateTimeField(auto_now_add=True)
     # for doctor
     complaint = models.TextField(null=True, blank=True, help_text="Shikoyat") # Shikoyat
     diagnosis = models.TextField(null=True, blank=True, help_text="Tashxis") # Tashxis
@@ -68,7 +69,7 @@ class Turn(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return self.patient.last_name
+        return self.client.last_name
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
@@ -95,4 +96,41 @@ class Turn(models.Model):
             self.turn_num = last_turn.turn_num + 1 if last_turn else 1
 
             super().save(*args, **kwargs)
+
+
+class Patient(BaseModel):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True)
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True)
+    doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    register_date = models.DateTimeField(default=now)
+    is_finished = models.BooleanField(default=False)
+    finished_date = models.DateTimeField(null=True)
+    total_sum = models.FloatField(default=0)
+
+    class Meta:
+        verbose_name = "Bemor "
+        verbose_name_plural = "Bemorlar"
+
+    def __str__(self):
+        return self.client.full_name
+
+
+class PatientService(BaseModel):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = "Bemor xizmat "
+        verbose_name_plural = "Bemor xizmatlari "
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.patient.total_sum += self.service.price
+
+            super().save(*args, **kwargs)
+
+
+
+
 

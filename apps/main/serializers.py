@@ -1,23 +1,23 @@
 from rest_framework import serializers
-from .models import Patient, Turn
+from .models import Client, Turn, Patient, PatientService
 from apps.stuff.serializers import ServiceSerializer
 from apps.users.serializers import DoctorSerializer
 
 
-class PatientSerializer(serializers.ModelSerializer):
+class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Patient
+        model = Client
         fields = '__all__'
 
 
 class TurnGetSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    patient = PatientSerializer
+    client = ClientSerializer
     doctor = DoctorSerializer()
     service = ServiceSerializer()
     class Meta:
         model = Turn
-        fields = ["patient", "doctor", "service", "price", "turn_num", "status", "created_at"]
+        fields = ["client", "doctor", "service", "price", "turn_num", "status", "created_at"]
         read_only_fields = ["turn_num", "created_at"]
 
 class TurnPostSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class TurnPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turn
         fields = [
-            'id', 'patient', 'service', 'doctor', 'price', 'turn_num',
+            'id', 'client', 'service', 'doctor', 'price', 'turn_num',
             'appointment_time', 'created_at'
         ]
         read_only_fields = ["turn_num", "created_at"]
@@ -51,3 +51,17 @@ class TurnCancelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This turn is already canceled.")
         return instance
 
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = [
+            'id', 'client', 'section', 'room', 'doctor', 'register_date',
+            'is_finished', 'finished_date', 'total_sum'
+        ]
+
+
+class PatientServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientService
+        fields = ['id', 'patient', 'service']

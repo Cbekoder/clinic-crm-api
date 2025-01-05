@@ -1,49 +1,40 @@
-from django.db.models.sql.constants import SINGLE
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import ValidationError
 from .models import Position, User
 from .serializers import UserSerializer, CustomTokenObtainPairSerializer, DoctorSerializer, \
-    SinglePositionSerializer, NurseSerializer, OtherStaffSerializer
+    PositionSerializer, NurseSerializer, OtherStaffSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+
+class UserProfile(APIView):
+    def get(self):
+        if self.request.user.is_authenticated:
+            serializer = UserSerializer(self.request.user)
+            return Response(serializer.data)
+            
+
 # Position Views
+class PositionsListCreateAPIView(ListCreateAPIView):
+    queryset = Position.objects.all()
+    serializer_class = PositionSerializer
+
+    def get_queryset(self):
+        queryset = Position.objects.all()
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset
+
+
 class PositionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Position.objects.all()
-    serializer_class = SinglePositionSerializer
-
-class DoctorPositions(ListCreateAPIView):
-    queryset = Position.objects.all()
-    serializer_class = SinglePositionSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(role='1')
-
-    def perform_create(self, serializer):
-        serializer.save(role='1')
-
-class NursePositions(ListCreateAPIView):
-    queryset = Position.objects.all()
-    serializer_class = SinglePositionSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(role='2')
-
-    def perform_create(self, serializer):
-        serializer.save(role='2')
-
-class OtherPositions(ListCreateAPIView):
-    queryset = Position.objects.all()
-    serializer_class = SinglePositionSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(role='3')
-
-    def perform_create(self, serializer):
-        serializer.save(role='3')
+    serializer_class = PositionSerializer
 
 
 

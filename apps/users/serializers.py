@@ -15,10 +15,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class SinglePositionSerializer(serializers.ModelSerializer):
+class PositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Position
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'role']
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -2,16 +2,12 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    # Position endpoints
-    path('positions/', PositionsListCreateAPIView.as_view(), name='position-list-create'),
-    path('positions/<int:pk>/', PositionRetrieveUpdateDestroyAPIView.as_view(), name='position-retrieve-update-destroy'),
     # User endpoints
-    # path('users/', UserListCreateAPIView.as_view(), name='user-list-create'),
-    # path('users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-retrieve-update-destroy'),
+    path('users/get-me/', UserProfile.as_view(), name='user-profile'),
+    path('users/', UserListCreateAPIView.as_view(), name='user-list'),
+    path('users/<int:pk>', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-retrieve-update-destroy'),
+    path('users/update-password/', PasswordUpdateView.as_view(), name='update-password'),
     # Doctors endpoints
-    path('doctors/', DoctorCreateView.as_view(), name='doctor-create'),
-    # path('users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-retrieve-update-destroy'),
-    # Nurses endpoints
-    path('nurse/', DoctorCreateView.as_view(), name='doctor-create'),
+    # path('doctors/', DoctorCreateView.as_view(), name='doctor-create'),
     # path('users/<int:pk>/', UserRetrieveUpdateDestroyAPIView.as_view(), name='user-retrieve-update-destroy'),
 ]

@@ -1,116 +1,70 @@
+from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import ValidationError
-from .models import Position, User
-from .serializers import UserSerializer, CustomTokenObtainPairSerializer, DoctorSerializer, \
-    PositionSerializer, NurseSerializer, OtherStaffSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from .permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
+from .models import User
+from .filters import UserFilter
+from .serializers import UserDetailSerializer, UserPostSerializer, CustomTokenObtainPairSerializer, \
+    PasswordUpdateSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-class UserProfile(APIView):
-    def get(self):
-        if self.request.user.is_authenticated:
-            serializer = UserSerializer(self.request.user)
-            return Response(serializer.data)
-            
-
-# Position Views
-class PositionsListCreateAPIView(ListCreateAPIView):
-    queryset = Position.objects.all()
-    serializer_class = PositionSerializer
-
-    def get_queryset(self):
-        queryset = Position.objects.all()
-        role = self.request.query_params.get('role')
-        if role:
-            queryset = queryset.filter(role=role)
-        return queryset
-
-
-class PositionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    queryset = Position.objects.all()
-    serializer_class = PositionSerializer
-
-
-
 # User Views
+class UserProfile(APIView):
+    def get(self, request):
+        if self.request.user.is_authenticated:
+            serializer = UserDetailSerializer(self.request.user)
+            return Response(serializer.data)
+
 class UserListCreateAPIView(ListCreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserDetailSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return UserDetailSerializer
+        return UserPostSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            permission_classes = [IsCEO, IsAdmin]
+        else:
+            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+        return [permission() for permission in permission_classes]
 
 class UserRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class DoctorCreateView(ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = DoctorSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(position__role='1')
+    serializer_class = UserDetailSerializer
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return DoctorSerializer
-        return UserSerializer
-
-    def perform_create(self, serializer):
-        # Fetch the position from the POST request
-        position = self.request.data.get('position')
-        if position:
-            position_obj = Position.objects.get(id=position)
-            if position_obj.role != '1':  # Check if it's 'Shifokor'
-                raise ValidationError("Position must be 'Shifokor'")
-
-        serializer.save()
-
-class NurseCreateView(ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = NurseSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(position__role='2')
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return NurseSerializer
-        return UserSerializer
-
-    def perform_create(self, serializer):
-        # Fetch the position from the POST request
-        position = self.request.data.get('position')
-        if position:
-            position_obj = Position.objects.get(id=position)
-            if position_obj.role != '2':  # Check if it's 'Hamshira'
-                raise ValidationError("Position must be 'Hamshira'")
-
-        serializer.save()
+            return UserDetailSerializer
+        return UserPostSerializer
 
 
-class OtherStaffCreateView(ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = OtherStaffSerializer
+class PasswordUpdateView(APIView):
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
-    def get_queryset(self):
-        return self.queryset.filter(position__role='3')
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return OtherStaffSerializer
-        return UserSerializer
-
-    def perform_create(self, serializer):
-        # Fetch the position from the POST request
-        position = self.request.data.get('position')
-        if position:
-            position_obj = Position.objects.get(id=position)
-            if position_obj.role != '3':  # Check if it's 'Boshqa'
-                raise ValidationError("Position must be 'Boshqa'")
-
-        serializer.save()
+    @swagger_auto_schema(
+        operation_description="Update the authenticated user's password.",
+        request_body=PasswordUpdateSerializer,
+    )
+    def put(self, request, *args, **kwargs):
+        serializer = PasswordUpdateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

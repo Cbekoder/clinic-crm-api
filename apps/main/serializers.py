@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Client, Turn, Patient, PatientService
 from apps.stuff.serializers import ServiceSerializer
-from apps.users.serializers import DoctorSerializer
+from ..users.serializers import UserSimpleDetailSerializer
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class ClientSerializer(serializers.ModelSerializer):
 class TurnGetSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     client = ClientSerializer
-    doctor = DoctorSerializer()
+    doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
     class Meta:
         model = Turn
@@ -34,6 +34,17 @@ class TurnPostSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         # representation = super().to_representation(instance)
         return TurnGetSerializer(instance).data
+
+class TurnUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Turn
+        fields = ['complaint', 'diagnosis', 'analysis_result', 'prescription']
+        extra_kwargs = {
+            'complaint': {'required': True},
+            'diagnosis': {'required': True},
+            'analysis_result': {'required': True},
+            'prescription': {'required': True},
+        }
 
 
 class TurnCancelSerializer(serializers.ModelSerializer):
@@ -64,4 +75,4 @@ class PatientSerializer(serializers.ModelSerializer):
 class PatientServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientService
-        fields = ['id', 'patient', 'service']
+        fields = ['id', 'patient', 'service', 'price']

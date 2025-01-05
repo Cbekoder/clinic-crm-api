@@ -2,102 +2,103 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
-from .models import Position, User
+from django.contrib.auth.password_validation import validate_password
+from .models import User
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        if self.user.position:
-            data['role'] = self.user.position.role
+        if self.user.role:
+            data['role'] = self.user.role
         else:
-            ValidationError({"error": "User position shouldn't be None"})
+            raise ValidationError({"error": "User role/ shouldn't be None"})
         return data
 
 
-class PositionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Position
-        fields = ['id', 'name', 'role']
-
-
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'first_name', 'last_name', 'middle_name', 'email',
+            'id', 'username', 'first_name', 'last_name', 'middle_name',
+            'birth_date', 'phone_number', 'extra_phone_number', 'salary', 'kpi',
+            'balance', 'job', 'role', 'status', 'working_time',
+            'employment_date', 'date_joined'
+        ]
+        read_only_fields = [
+            'id', 'balance', 'status', 'employment_date', 'working_time',
+            'date_joined', 'salary', 'kpi', 'role'
+        ]
+
+class UserSimpleDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id', 'first_name', 'last_name', 'middle_name', 'job', 'role', 'room'
+        ]
+
+class UserPostSerializer(serializers.ModelSerializer):
+    salary_or_kpi = serializers.FloatField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
             'birth_date', 'phone_number', 'extra_phone_number', 'balance',
-            'status', 'employment_date', 'working_time', 'is_active', 'date_joined'
+            'status', 'employment_date', 'working_time',
+            'salary_or_kpi', 'role', 'job', 'date_joined'
         ]
-        read_only_fields = ['balance', 'date_joined', 'is_active']
-
-
-class DoctorSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # password will be write-only
-
-    class Meta:
-        model = User
-        fields = [
-            'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
-            'birth_date', 'phone_number', 'extra_phone_number',
-            'room', 'position', 'status', 'employment_date', 'working_time'
-        ]
-
-    def validate_position(self, value):
-        if value.role != '1':  # Ensure position is 'Shifokor'
-            raise serializers.ValidationError("Position must be 'Shifokor'")
-        return value
+        read_only_fields = ['balance', 'status', 'date_joined']
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
+        salary_or_kpi = validated_data.pop('salary_or_kpi', None)
+        role = validated_data.get('role', 'other')
+
+        if salary_or_kpi is not None:
+            if role == 'doctor':
+                validated_data['kpi'] = salary_or_kpi
+            else:
+                validated_data['salary'] = salary_or_kpi
+
+        password = validated_data.pop('password', None)
         user = User(**validated_data)
-        user.password = make_password(password)
+
+        if password:
+            user.password = make_password(password)
+
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        salary_or_kpi = validated_data.pop('salary_or_kpi', None)
+        role = validated_data.get('role', instance.role)
 
-class NurseSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # password will be write-only
+        if salary_or_kpi is not None:
+            if role == 'doctor':
+                instance.kpi = salary_or_kpi
+            else:
+                instance.salary = salary_or_kpi
 
-    class Meta:
-        model = User
-        fields = [
-            'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
-            'birth_date', 'phone_number', 'extra_phone_number',
-            'room', 'position', 'status', 'employment_date', 'working_time'
-        ]
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
 
-    def validate_position(self, value):
-        if value.role != '2':  # Ensure position is 'Hamshira'
-            raise serializers.ValidationError("Position must be 'Hamshira'")
+        if 'password' in validated_data:
+            instance.password = make_password(validated_data['password'])
+
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        return UserDetailSerializer(instance).data
+
+
+
+class PasswordUpdateSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
         return value
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.password = make_password(password)
-        user.save()
-        return user
-
-class OtherStaffSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # password will be write-only
-
-    class Meta:
-        model = User
-        fields = [
-            'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
-            'birth_date', 'phone_number', 'extra_phone_number',
-            'room', 'position', 'status', 'employment_date', 'working_time'
-        ]
-
-    def validate_position(self, value):
-        if value.role != '3':  # Ensure position is 'Hamshira'
-            raise serializers.ValidationError("Position must be 'Boshqa'")
-        return value
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.password = make_password(password)
-        user.save()
-        return user

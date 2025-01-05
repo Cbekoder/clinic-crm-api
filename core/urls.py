@@ -10,7 +10,7 @@ urlpatterns = [
     path('auth/', include('apps.users.auth_urls')),
     path('', include("apps.users.urls")),
     path('', include("apps.main.urls")),
-    path('', include("apps.stuff.urls"))
+    path('stuff/', include("apps.stuff.urls"))
 ]
 
 urlpatterns += swagger_urlpatterns

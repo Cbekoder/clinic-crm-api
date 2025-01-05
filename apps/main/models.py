@@ -119,6 +119,7 @@ class Patient(BaseModel):
 class PatientService(BaseModel):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
+    price = models.FloatField()
 
     class Meta:
         verbose_name = "Bemor xizmat "

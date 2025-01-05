@@ -6,26 +6,42 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from datetime import date
 from django.utils.dateparse import parse_date
+from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
+
 
 from .models import Client, Turn, Patient, PatientService
 from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
-    PatientSerializer, PatientServiceSerializer
+    PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer
 
 
 class ClientListCreateAPIView(ListCreateAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+        else:
+            permission_classes = [IsCEO, IsAdmin, IsRegistrator]
+        return [permission() for permission in permission_classes]
+
 
 class ClientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+        else:
+            permission_classes = [IsCEO, IsAdmin, IsRegistrator]
+        return [permission() for permission in permission_classes]
+
 
 class TurnListCreateAPIView(ListCreateAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnGetSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
     filter_backends = [SearchFilter]
     search_fields = ['doctor__first_name', 'doctor__last_name',
                      'doctor__room', 'service__name', 'service__room',
@@ -77,17 +93,34 @@ class TurnListCreateAPIView(ListCreateAPIView):
 class TurnRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnGetSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return TurnGetSerializer
         return TurnPostSerializer
 
+class DoctorTurnUpdateAPIView(UpdateAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = TurnUpdateSerializer
+    permission_classes = [IsDoctor]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role  == 'doctor':
+            return self.queryset.filter(doctor=user)
+        return self.queryset.none()
+
+    def perform_update(self, serializer):
+        turn = serializer.instance
+        if turn.doctor != self.request.user:
+            raise ValidationError({"detail": "You can only update your assigned turns."})
+        serializer.save()
+
 class TurnCancelAPIView(UpdateAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnCancelSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
     def perform_update(self, serializer):
         turn = self.get_object()
@@ -99,20 +132,24 @@ class TurnCancelAPIView(UpdateAPIView):
 class PatientListCreateAPIView(ListCreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
 class PatientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
 class PatientServiceListCreateAPIView(ListCreateAPIView):
     queryset = PatientService.objects.all()
     serializer_class = PatientServiceSerializer
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
 
 
 class PatientServiceRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = PatientService.objects.all()
     serializer_class = PatientServiceSerializer
+    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+
 
 
 

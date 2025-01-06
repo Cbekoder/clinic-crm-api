@@ -64,7 +64,8 @@ class UserPostSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
 
         if password:
-            user.password = make_password(password)
+            user.set_password(password)
+            # user.password = make_password(password)
 
         user.save()
         return user

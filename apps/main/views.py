@@ -20,9 +20,9 @@ class ClientListCreateAPIView(ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsRegistrator]
         return [permission() for permission in permission_classes]
 
 
@@ -32,16 +32,16 @@ class ClientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsRegistrator]
         return [permission() for permission in permission_classes]
 
 
 class TurnListCreateAPIView(ListCreateAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnGetSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
     filter_backends = [SearchFilter]
     search_fields = ['doctor__first_name', 'doctor__last_name',
                      'doctor__room', 'service__name', 'service__room',
@@ -93,7 +93,7 @@ class TurnListCreateAPIView(ListCreateAPIView):
 class TurnRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnGetSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -120,7 +120,7 @@ class DoctorTurnUpdateAPIView(UpdateAPIView):
 class TurnCancelAPIView(UpdateAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnCancelSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
     def perform_update(self, serializer):
         turn = self.get_object()
@@ -132,23 +132,23 @@ class TurnCancelAPIView(UpdateAPIView):
 class PatientListCreateAPIView(ListCreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 class PatientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 class PatientServiceListCreateAPIView(ListCreateAPIView):
     queryset = PatientService.objects.all()
     serializer_class = PatientServiceSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 
 class PatientServiceRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = PatientService.objects.all()
     serializer_class = PatientServiceSerializer
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 
 

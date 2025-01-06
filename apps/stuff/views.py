@@ -10,9 +10,9 @@ class SectionListCreateAPIView(ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
 
 class SectionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -21,20 +21,21 @@ class SectionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
 
 class RoomListCreateAPIView(ListCreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    # permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
 
 class RoomRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -43,9 +44,9 @@ class RoomRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
 
 class ServiceListCreateView(ListCreateAPIView):
@@ -54,9 +55,9 @@ class ServiceListCreateView(ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
 
 
@@ -66,7 +67,7 @@ class ServiceDetailView(RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         else:
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]

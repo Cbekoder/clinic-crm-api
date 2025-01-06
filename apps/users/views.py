@@ -38,9 +38,9 @@ class UserListCreateAPIView(ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            permission_classes = [IsCEO, IsAdmin]
+            permission_classes = [IsCEO | IsAdmin]
         else:
-            permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+            permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
         return [permission() for permission in permission_classes]
 
 class UserRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -54,7 +54,7 @@ class UserRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class PasswordUpdateView(APIView):
-    permission_classes = [IsCEO, IsAdmin, IsDoctor, IsRegistrator]
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
     @swagger_auto_schema(
         operation_description="Update the authenticated user's password.",

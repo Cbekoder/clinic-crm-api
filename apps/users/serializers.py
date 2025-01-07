@@ -49,6 +49,14 @@ class UserPostSerializer(serializers.ModelSerializer):
             'salary_or_kpi', 'role', 'job', 'room', 'date_joined'
         ]
         read_only_fields = ['balance', 'status', 'date_joined']
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': False}
+        }
+
+    def validate(self, data):
+        if not self.instance and 'password' not in data:
+            raise serializers.ValidationError({'password': 'This field is required for new users.'})
+        return data
 
     def create(self, validated_data):
         salary_or_kpi = validated_data.pop('salary_or_kpi', None)
@@ -80,10 +88,13 @@ class UserPostSerializer(serializers.ModelSerializer):
                 instance.salary = salary_or_kpi
 
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        if 'password' in validated_data:
-            instance.password = make_password(validated_data['password'])
+            if attr == 'password' and value:
+                instance.set_password(value)
+            else:
+                setattr(instance, attr, value)
+        #
+        # if 'password' in validated_data:
+        #     instance.password = make_password(validated_data['password'])
 
         instance.save()
         return instance

@@ -21,7 +21,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'first_name', 'last_name', 'middle_name',
-            'birth_date', 'phone_number', 'extra_phone_number', 'salary', 'kpi',
+            'birth_date', 'gender', 'address', 'phone_number', 'room', 'extra_phone_number', 'salary', 'kpi',
             'balance', 'job', 'role', 'status', 'working_time',
             'employment_date', 'date_joined'
         ]
@@ -44,9 +44,9 @@ class UserPostSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
-            'birth_date', 'phone_number', 'extra_phone_number', 'balance',
+            'birth_date', 'gender', 'address', 'phone_number', 'extra_phone_number', 'balance',
             'status', 'employment_date', 'working_time',
-            'salary_or_kpi', 'role', 'job', 'date_joined'
+            'salary_or_kpi', 'role', 'job', 'room', 'date_joined'
         ]
         read_only_fields = ['balance', 'status', 'date_joined']
 
@@ -65,7 +65,6 @@ class UserPostSerializer(serializers.ModelSerializer):
 
         if password:
             user.set_password(password)
-            # user.password = make_password(password)
 
         user.save()
         return user

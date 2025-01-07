@@ -74,7 +74,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    'DEFAULT_PAGINATION_CLASS': 'core.paginations.CustomPagination',
     "PAGE_SIZE": 10,
     "DEFAULT_THROTTLE_RATES": {"anon": "10/second", "user": "10/second"},
     # "EXCEPTION_HANDLER": "utils.exceptionhandler.custom_exception_handler",

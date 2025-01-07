@@ -15,10 +15,17 @@ STATUS_CHOICES = (
     ("inactive", "Nofaol")
 )
 
+GENDER_CHOICES = (
+    ("male", "Erkak"),
+    ("female", "Ayol")
+)
+
 
 class User(AbstractUser, BaseModel):
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     extra_phone_number = models.CharField(max_length=15, null=True, blank=True)
     salary = models.FloatField(null=True, blank=True)

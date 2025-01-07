@@ -5,14 +5,14 @@ from datetime import date
 
 from apps.common.models import BaseModel
 from apps.stuff.models import Service, Section, Room
-from apps.users.models import User
+from apps.users.models import User, GENDER_CHOICES
 
 
 class Client(BaseModel):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     middle_name = models.CharField(max_length=200, null=True, blank=True)
-    gender = models.CharField(max_length=10)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     birth_date = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=15)
     extra_phone_number = models.CharField(max_length=15, null=True, blank=True)

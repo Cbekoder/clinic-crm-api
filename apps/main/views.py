@@ -5,6 +5,7 @@ from rest_framework.filters import SearchFilter
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from datetime import date
+from django.db.models import Q
 from django.utils.dateparse import parse_date
 from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
 
@@ -24,6 +25,33 @@ class ClientListCreateAPIView(ListCreateAPIView):
         else:
             permission_classes = [IsCEO | IsAdmin | IsRegistrator]
         return [permission() for permission in permission_classes]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'search',
+                openapi.IN_QUERY,
+                description="Search clients by first name, last name, middle name, phone number, or address",
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(middle_name__icontains=search_query) |
+                Q(phone_number__icontains=search_query) |
+                Q(extra_phone_number__icontains=search_query) |
+                Q(address__icontains=search_query)
+            )
+        return queryset
 
 
 class ClientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):

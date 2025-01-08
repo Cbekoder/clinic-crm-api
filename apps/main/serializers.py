@@ -6,6 +6,8 @@ from .models import Client, Turn, Patient, PatientService
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    updated_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = Client
         fields = '__all__'
@@ -98,13 +100,22 @@ class PatientServiceSerializer(serializers.ModelSerializer):
         fields = ['id', 'patient', 'service', 'price', 'created_at']
         read_only_fields = ["created_at"]
 
+class PatientServiceDetailSerializer(serializers.ModelSerializer):
+    patient = PatientSerializer()
+    service = ServiceSerializer()
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    class Meta:
+        model = PatientService
+        fields = ['id', 'patient', 'service', 'price', 'created_at']
+        read_only_fields = ["created_at"]
+
 
 class PatientDetailSerializer(serializers.ModelSerializer):
     client = ClientSerializer()
     section = SectionSerializer()
     room = RoomSerializer()
     doctor = UserSimpleDetailSerializer()
-    services = PatientServiceSerializer(source='patientservice_set', many=True, read_only=True)
+    services = PatientServiceDetailSerializer(source='patientservice_set', many=True, read_only=True)
 
     class Meta:
         model = Patient

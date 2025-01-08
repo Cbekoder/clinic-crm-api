@@ -50,6 +50,7 @@ class Turn(BaseModel):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
     doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     price = models.FloatField()
+    is_paid = models.BooleanField(default=False)
     turn_num = models.PositiveIntegerField()
     turn_type = models.CharField(max_length=10, choices=TURN_CHOICE, default='0')
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="new")

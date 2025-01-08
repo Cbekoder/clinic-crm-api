@@ -2,7 +2,7 @@ from django.urls import path
 from .views import PatientListCreateAPIView, TurnListCreateAPIView, TurnRetrieveUpdateDestroyAPIView, TurnCancelAPIView, \
     ClientListCreateAPIView, PatientRetrieveUpdateDestroyAPIView, PatientServiceRetrieveUpdateDestroyAPIView, \
     PatientServiceListCreateAPIView, ClientRetrieveUpdateDestroyAPIView, DoctorTurnUpdateAPIView, \
-    PatientPaymentListCreateAPIView, PatientPaymentRetrieveUpdateDestroyAPIView
+    PatientPaymentListCreateAPIView, PatientPaymentRetrieveUpdateDestroyAPIView, TurnFullDetailAPIView
 
 urlpatterns = [
     # Client urls
@@ -12,6 +12,7 @@ urlpatterns = [
     # Turn urls
     path('turns/', TurnListCreateAPIView.as_view(), name='turn-list-create'),
     path('turns/<int:id>', TurnRetrieveUpdateDestroyAPIView.as_view(), name='turn-detail-update-delete'),
+    path('turns/full-detail/', TurnFullDetailAPIView.as_view(), name='turn-full-detail'),
     path('turns/doctor/<int:pk>', DoctorTurnUpdateAPIView.as_view(), name='doctor-turn-update'),
     path('turns/cancel/<int:pk>', TurnCancelAPIView.as_view(), name='turn-cancel'),
 

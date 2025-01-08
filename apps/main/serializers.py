@@ -20,7 +20,17 @@ class TurnGetSerializer(serializers.ModelSerializer):
     service = ServiceSerializer()
     class Meta:
         model = Turn
-        fields = ["client", "doctor", "service", "price", "turn_num", "status", "created_at"]
+        fields = ['id', "client", "doctor", "service", "price", "turn_num", "status", "created_at"]
+        read_only_fields = ["turn_num", "created_at"]
+
+class TurnFullDetailSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    client = ClientSerializer
+    doctor = UserSimpleDetailSerializer()
+    service = ServiceSerializer()
+    class Meta:
+        model = Turn
+        fields = ['id', "client", "doctor", "service", "price", "turn_num", "status", 'complaint', 'diagnosis', 'analysis_result', 'prescription', "created_at"]
         read_only_fields = ["turn_num", "created_at"]
 
 class TurnPostSerializer(serializers.ModelSerializer):
@@ -41,7 +51,7 @@ class TurnPostSerializer(serializers.ModelSerializer):
 class TurnUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turn
-        fields = ['complaint', 'diagnosis', 'analysis_result', 'prescription']
+        fields = ['id', 'complaint', 'diagnosis', 'analysis_result', 'prescription']
         extra_kwargs = {
             'complaint': {'required': True},
             'diagnosis': {'required': True},

@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from drf_yasg.utils import swagger_auto_schema
@@ -13,7 +13,7 @@ from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
 from .models import Client, Turn, Patient, PatientService, PatientPayment
 from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
     PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer, PatientPostSerializer, PatientDetailSerializer, \
-    PatientPaymentSerializer
+    PatientPaymentSerializer, TurnFullDetailSerializer
 
 
 class ClientListCreateAPIView(ListCreateAPIView):
@@ -130,13 +130,13 @@ class TurnRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return TurnPostSerializer
 
 class DoctorTurnUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsDoctor, IsAuthenticated]
     queryset = Turn.objects.all()
     serializer_class = TurnUpdateSerializer
-    permission_classes = [IsDoctor]
 
     def get_queryset(self):
         user = self.request.user
-        if user.role  == 'doctor':
+        if user.is_authenticated and user.role  == 'doctor':
             return self.queryset.filter(doctor=user)
         return self.queryset.none()
 
@@ -156,6 +156,11 @@ class TurnCancelAPIView(UpdateAPIView):
         if turn.is_canceled:
             raise ValidationError("This turn is already canceled.")
         serializer.save()
+
+class TurnFullDetailAPIView(ListAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = TurnFullDetailSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 
 class PatientListCreateAPIView(ListCreateAPIView):

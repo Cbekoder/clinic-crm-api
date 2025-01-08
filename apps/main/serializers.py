@@ -71,6 +71,8 @@ class PatientSerializer(serializers.ModelSerializer):
     section = SectionSerializer()
     room = RoomSerializer()
     doctor = UserSimpleDetailSerializer()
+    register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = Patient
         fields = [

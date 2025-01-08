@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import PatientListCreateAPIView, TurnListCreateAPIView, TurnRetrieveUpdateDestroyAPIView, TurnCancelAPIView, \
     ClientListCreateAPIView, PatientRetrieveUpdateDestroyAPIView, PatientServiceRetrieveUpdateDestroyAPIView, \
-    PatientServiceListCreateAPIView, ClientRetrieveUpdateDestroyAPIView, DoctorTurnUpdateAPIView
+    PatientServiceListCreateAPIView, ClientRetrieveUpdateDestroyAPIView, DoctorTurnUpdateAPIView, \
+    PatientPaymentListCreateAPIView, PatientPaymentRetrieveUpdateDestroyAPIView
 
 urlpatterns = [
     # Client urls
@@ -22,5 +23,10 @@ urlpatterns = [
     path('patient-services/', PatientServiceListCreateAPIView.as_view(), name='patient-service-list-create'),
     path('patient-services/<int:pk>/', PatientServiceRetrieveUpdateDestroyAPIView.as_view(),
          name='patient-service-detail'),
+
+    # PatientService URLs
+    path('patient-payment/', PatientPaymentListCreateAPIView.as_view(), name='patient-payment-list-create'),
+    path('patient-payment/<int:pk>/', PatientPaymentRetrieveUpdateDestroyAPIView.as_view(),
+         name='patient-payment-detail'),
 
 ]

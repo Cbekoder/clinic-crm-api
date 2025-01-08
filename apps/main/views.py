@@ -10,9 +10,10 @@ from django.utils.dateparse import parse_date
 from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
 
 
-from .models import Client, Turn, Patient, PatientService
+from .models import Client, Turn, Patient, PatientService, PatientPayment
 from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
-    PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer, PatientPostSerializer, PatientDetailSerializer
+    PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer, PatientPostSerializer, PatientDetailSerializer, \
+    PatientPaymentSerializer
 
 
 class ClientListCreateAPIView(ListCreateAPIView):
@@ -186,6 +187,18 @@ class PatientServiceListCreateAPIView(ListCreateAPIView):
 class PatientServiceRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = PatientService.objects.all()
     serializer_class = PatientServiceSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+
+class PatientPaymentListCreateAPIView(ListCreateAPIView):
+    queryset = PatientPayment.objects.all()
+    serializer_class = PatientPaymentSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+
+class PatientPaymentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = PatientPayment.objects.all()
+    serializer_class = PatientPaymentSerializer
     permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
 

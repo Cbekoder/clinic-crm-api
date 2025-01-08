@@ -77,7 +77,7 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
-            'is_finished', 'finished_date', 'total_sum'
+            'is_finished', 'finished_date', 'total_sum', 'total_remainder'
         ]
 
 class PatientPostSerializer(serializers.ModelSerializer):
@@ -87,8 +87,9 @@ class PatientPostSerializer(serializers.ModelSerializer):
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
-            'is_finished', 'finished_date', 'total_sum'
+            'is_finished', 'finished_date', 'total_sum', 'total_remainder'
         ]
+        read_only_fields = ["register_date", "finished_date", "total_sum", "total_remainder"]
 
     def to_representation(self, instance):
         # representation = super().to_representation(instance)
@@ -140,5 +141,5 @@ class PatientDetailSerializer(serializers.ModelSerializer):
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
-            'is_finished', 'finished_date', 'total_sum', 'services', 'payments'
+            'is_finished', 'finished_date', 'total_sum', 'total_remainder', 'services', 'payments'
         ]

@@ -134,6 +134,29 @@ class PatientService(BaseModel):
 
             super().save(*args, **kwargs)
 
+class PatientPayment(BaseModel):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    description = models.TextField(null=True, blank=True)
+    summa = models.FloatField()
+
+    class Meta:
+        verbose_name = "Bemor to'lov "
+        verbose_name_plural = "Bemor to'lovlar "
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.pk:
+                old_payment = PatientPayment.objects.get(pk=self.pk)
+                difference = self.summa - old_payment.summa
+            else:
+                difference = self.summa
+
+            self.patient.total_sum -= difference
+            self.patient.save(update_fields=['total_sum'])
+
+            super().save(*args, **kwargs)
+
 
 
 

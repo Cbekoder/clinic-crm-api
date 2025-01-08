@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import DateTimeField
 from apps.stuff.serializers import ServiceSerializer, SectionSerializer, RoomSerializer
 from apps.users.serializers import UserSimpleDetailSerializer
-from .models import Client, Turn, Patient, PatientService
+from .models import Client, Turn, Patient, PatientService, PatientPayment
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -110,16 +110,33 @@ class PatientServiceDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
 
+class PatientPaymentSerializer(serializers.ModelSerializer):
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    class Meta:
+        model = PatientPayment
+        fields = ['id', 'patient', 'summa', 'description', 'created_at']
+        read_only_fields = ["created_at"]
+
+class PatientPaymentDetailSerializer(serializers.ModelSerializer):
+    patient = PatientSerializer()
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    class Meta:
+        model = PatientPayment
+        fields = ['id', 'patient', 'summa', 'description', 'created_at']
+        read_only_fields = ["created_at"]
+
+
 class PatientDetailSerializer(serializers.ModelSerializer):
     client = ClientSerializer()
     section = SectionSerializer()
     room = RoomSerializer()
     doctor = UserSimpleDetailSerializer()
     services = PatientServiceDetailSerializer(source='patientservice_set', many=True, read_only=True)
+    payments = PatientPaymentDetailSerializer(source='patientpayment_set', many=True, read_only=True)
 
     class Meta:
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
-            'is_finished', 'finished_date', 'total_sum', 'services'
+            'is_finished', 'finished_date', 'total_sum', 'services', 'payments'
         ]

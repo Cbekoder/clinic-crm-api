@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Client, Turn, Patient, PatientService
-from apps.stuff.serializers import ServiceSerializer
+from apps.stuff.serializers import ServiceSerializer, SectionSerializer, RoomSerializer
 from ..users.serializers import UserSimpleDetailSerializer
 
 
@@ -64,12 +64,28 @@ class TurnCancelSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    client = ClientSerializer()
+    section = SectionSerializer()
+    room = RoomSerializer()
+    doctor = UserSimpleDetailSerializer()
     class Meta:
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
             'is_finished', 'finished_date', 'total_sum'
         ]
+
+class PatientPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = [
+            'id', 'client', 'section', 'room', 'doctor', 'register_date',
+            'is_finished', 'finished_date', 'total_sum'
+        ]
+
+    def to_representation(self, instance):
+        # representation = super().to_representation(instance)
+        return PatientSerializer(instance).data
 
 
 class PatientServiceSerializer(serializers.ModelSerializer):

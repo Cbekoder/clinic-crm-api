@@ -12,7 +12,7 @@ from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
 
 from .models import Client, Turn, Patient, PatientService
 from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
-    PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer
+    PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer, PatientPostSerializer
 
 
 class ClientListCreateAPIView(ListCreateAPIView):
@@ -162,10 +162,20 @@ class PatientListCreateAPIView(ListCreateAPIView):
     serializer_class = PatientSerializer
     permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PatientSerializer
+        return PatientPostSerializer
+
 class PatientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PatientSerializer
+        return PatientPostSerializer
 
 class PatientServiceListCreateAPIView(ListCreateAPIView):
     queryset = PatientService.objects.all()

@@ -40,7 +40,7 @@ class TurnPostSerializer(serializers.ModelSerializer):
         model = Turn
         fields = [
             'id', 'client', 'service', 'doctor', 'price', 'turn_num',
-            'appointment_time', 'created_at'
+            'appointment_time', 'is_paid', 'created_at'
         ]
         read_only_fields = ["turn_num", "created_at"]
 

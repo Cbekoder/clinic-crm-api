@@ -108,6 +108,7 @@ class Patient(BaseModel):
     is_finished = models.BooleanField(default=False)
     finished_date = models.DateTimeField(null=True)
     total_sum = models.FloatField(default=0)
+    total_remainder = models.FloatField(default=0)
 
     class Meta:
         verbose_name = "Bemor "
@@ -130,7 +131,8 @@ class PatientService(BaseModel):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            self.patient.total_sum += self.service.price
+            self.patient.total_sum += self.price
+            self.patient.total_remainder += self.price
 
             super().save(*args, **kwargs)
 
@@ -152,8 +154,8 @@ class PatientPayment(BaseModel):
             else:
                 difference = self.summa
 
-            self.patient.total_sum -= difference
-            self.patient.save(update_fields=['total_sum'])
+            self.patient.total_remainder -= difference
+            self.patient.save(update_fields=['total_remainder'])
 
             super().save(*args, **kwargs)
 

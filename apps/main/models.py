@@ -21,6 +21,7 @@ class Client(BaseModel):
     class Meta:
         verbose_name = "Mijoz "
         verbose_name_plural = "Mijozlar "
+        ordering = ['-created_at']
 
     @property
     def full_name(self):
@@ -111,6 +112,7 @@ class Patient(BaseModel):
     class Meta:
         verbose_name = "Bemor "
         verbose_name_plural = "Bemorlar"
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.client.full_name
@@ -124,6 +126,7 @@ class PatientService(BaseModel):
     class Meta:
         verbose_name = "Bemor xizmat "
         verbose_name_plural = "Bemor xizmatlari "
+        ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
         with transaction.atomic():

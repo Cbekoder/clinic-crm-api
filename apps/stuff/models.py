@@ -10,6 +10,7 @@ class Section(BaseModel):
     class Meta:
         verbose_name = "Bo'lim "
         verbose_name_plural = "Bo'limlar "
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.name
@@ -25,6 +26,7 @@ class Room(BaseModel):
     class Meta:
         verbose_name = "Xona "
         verbose_name_plural = "Xonalar "
+        ordering = ['-created_at']
 
     def clean(self):
         if self.free_seats > self.all_seats:

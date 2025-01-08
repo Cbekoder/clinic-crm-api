@@ -42,6 +42,7 @@ class User(AbstractUser, BaseModel):
     class Meta:
         verbose_name = "Foydalanuvchi "
         verbose_name_plural = "Foydalanuvchilar"
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.username

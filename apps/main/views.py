@@ -152,7 +152,18 @@ class DoctorTurnUpdateAPIView(UpdateAPIView):
         turn = serializer.instance
         if turn.doctor != self.request.user:
             raise ValidationError({"detail": "You can only update your assigned turns."})
-        serializer.save()
+        serializer.save(status="closed")
+
+class DoctorTurnListAPIView(ListAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = TurnFullDetailSerializer
+    permission_classes = [IsDoctor, IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.role  == 'doctor':
+            return self.queryset.filter(doctor=user)
+        return self.queryset.none()
 
 class TurnCancelAPIView(UpdateAPIView):
     queryset = Turn.objects.all()

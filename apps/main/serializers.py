@@ -16,6 +16,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class TurnGetSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
@@ -26,6 +27,7 @@ class TurnGetSerializer(serializers.ModelSerializer):
 
 class TurnFullDetailSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
@@ -36,6 +38,7 @@ class TurnFullDetailSerializer(serializers.ModelSerializer):
 
 class TurnPostSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
     class Meta:
         model = Turn

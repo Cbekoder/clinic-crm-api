@@ -68,7 +68,7 @@ class Turn(BaseModel):
     class Meta:
         verbose_name = "Navbat"
         verbose_name_plural = "Navbatlar"
-        ordering = ['-created_at']
+        ordering = ['-appointment_time']
 
     def __str__(self):
         return self.client.last_name

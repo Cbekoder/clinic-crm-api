@@ -25,7 +25,7 @@ class TurnGetSerializer(serializers.ModelSerializer):
 
 class TurnFullDetailSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    client = ClientSerializer
+    client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
     class Meta:

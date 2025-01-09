@@ -97,6 +97,14 @@ class Turn(BaseModel):
 
             self.turn_num = last_turn.turn_num + 1 if last_turn else 1
 
+            active_patient = self.client.patient_set.filter(is_finished=False).first()
+            if active_patient and self.service:
+                PatientService(
+                    patient=active_patient,
+                    service=self.service,
+                    price=self.price
+                ).save()
+
             super().save(*args, **kwargs)
 
 
@@ -118,6 +126,15 @@ class Patient(BaseModel):
 
     def __str__(self):
         return self.client.full_name
+
+    def save(self, *args, **kwargs):
+        if not self.is_finished:
+            existing_patient = Patient.objects.filter(client=self.client, is_finished=False).exclude(
+                pk=self.pk).exists()
+            if existing_patient:
+                raise ValidationError({"error": "This client already has an unfinished patient record."})
+
+        super().save(*args, **kwargs)
 
 
 class PatientService(BaseModel):

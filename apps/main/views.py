@@ -257,7 +257,7 @@ class ReportView(APIView):
         if not start_date or not end_date:
             return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
 
-        turns = Turn.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+        turns = Turn.objects.filter(is_paid=True, created_at__date__gte=start_date, created_at__date__lte=end_date)
 
         doctor_id = request.query_params.get('doctor')
         service_id = request.query_params.get('service')

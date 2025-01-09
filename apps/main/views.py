@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView, ListAPIView, \
+    RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from drf_yasg.utils import swagger_auto_schema
@@ -177,6 +178,12 @@ class TurnCancelAPIView(UpdateAPIView):
         serializer.save()
 
 class TurnFullDetailAPIView(ListAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = TurnFullDetailSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+
+class TurnFullDetailRetrieveAPIView(RetrieveAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnFullDetailSerializer
     permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]

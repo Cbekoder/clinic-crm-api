@@ -21,7 +21,7 @@ class TurnGetSerializer(serializers.ModelSerializer):
     service = ServiceSerializer()
     class Meta:
         model = Turn
-        fields = ['id', "client", "doctor", "service", "price", "turn_num", "status", "created_at"]
+        fields = ['id', "client", "doctor", "service", "price", 'is_paid', "turn_num", 'appointment_time', "status", "created_at"]
         read_only_fields = ["turn_num", "created_at"]
 
 class TurnFullDetailSerializer(serializers.ModelSerializer):
@@ -31,7 +31,7 @@ class TurnFullDetailSerializer(serializers.ModelSerializer):
     service = ServiceSerializer()
     class Meta:
         model = Turn
-        fields = ['id', "client", "doctor", "service", "price", "turn_num", "status", 'complaint', 'diagnosis', 'analysis_result', 'prescription', "created_at"]
+        fields = ['id', "client", "doctor", "service", "price", "turn_num", 'is_paid', "status", 'appointment_time', 'complaint', 'diagnosis', 'analysis_result', 'prescription', "created_at"]
         read_only_fields = ["turn_num", "created_at"]
 
 class TurnPostSerializer(serializers.ModelSerializer):

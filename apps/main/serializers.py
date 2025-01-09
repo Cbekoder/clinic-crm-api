@@ -156,15 +156,14 @@ class PatientDetailSerializer(serializers.ModelSerializer):
         else:
             duration = now().date() - obj.register_date.date()
 
-        days = duration.days + 1  # Include the starting day
+        days = duration.days + 1
 
-        # Calculate the total price
-        if obj.room and hasattr(obj.room, 'daily_rate'):
-            daily_rate = obj.room.daily_rate
+        if obj.room and hasattr(obj.room, 'seat_price'):
+            seat_price = obj.room.seat_price
         else:
-            daily_rate = 0
+            seat_price = 0
 
-        total_sum = days * daily_rate
+        total_sum = days * seat_price
 
         return {
             "days": days,

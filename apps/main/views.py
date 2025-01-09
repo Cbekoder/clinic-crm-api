@@ -199,6 +199,17 @@ class PatientListCreateAPIView(ListCreateAPIView):
             return PatientSerializer
         return PatientPostSerializer
 
+class DoctorPatientListAPIView(ListAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientSerializer
+    permission_classes = [IsDoctor, IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.role  == 'doctor':
+            return self.queryset.filter(doctor=user)
+        return self.queryset.none()
+
 class PatientRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
@@ -257,7 +268,7 @@ class ReportView(APIView):
         if not start_date or not end_date:
             return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
 
-        turns = Turn.objects.filter(is_paid=True, created_at__date__gte=start_date, created_at__date__lte=end_date)
+        turns = Turn.objects.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
 
         doctor_id = request.query_params.get('doctor')
         service_id = request.query_params.get('service')
@@ -269,6 +280,7 @@ class ReportView(APIView):
             turns = turns.filter(service_id=service_id)
 
         total_sum = turns.aggregate(total_price=Sum('price'))['total_price']
+        total_paid = turns.filter(is_paid=True).aggregate(total_price=Sum('price'))['total_price']
 
         doctors = User.objects.filter(role="doctor")
         services = Service.objects.all()
@@ -299,14 +311,40 @@ class ReportView(APIView):
                     "total_price": total_price
                 })
 
+        # Client payments aggregation
+        clients = Client.objects.all()
+        client_report = []
+        clients_total = 0
+
+        for client in clients:
+            total_price = PatientPayment.objects.filter(
+                patient__client=client,
+                created_at__date__gte=start_date,
+                created_at__date__lte=end_date
+            ).aggregate(total_summa=Sum('summa'))['total_summa'] or 0
+
+            if total_price > 0:
+                clients_total += total_price
+                client_data = {
+                    "id": client.id,
+                    "full_name": client.full_name,
+                }
+                client_report.append({
+                    "client": client_data,
+                    "total_price": total_price
+                })
+
         return Response({
             "total_price": total_sum,
+            "total_paid": total_paid,
             "start_date": start_date,
             "end_date": end_date,
             "doctors_total": doctor_total,
             "doctor_report": doctor_report,
             "services_total": service_total,
-            "service_report": service_report
+            "service_report": service_report,
+            "clients_total": clients_total,
+            "client_report": client_report
         })
 
 

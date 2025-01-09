@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.serializers import DateTimeField
+from django.utils.timezone import now
 from apps.stuff.serializers import ServiceSerializer, SectionSerializer, RoomSerializer
 from apps.users.serializers import UserSimpleDetailSerializer
 from .models import Client, Turn, Patient, PatientService, PatientPayment
@@ -140,10 +141,32 @@ class PatientDetailSerializer(serializers.ModelSerializer):
     doctor = UserSimpleDetailSerializer()
     services = PatientServiceDetailSerializer(source='patientservice_set', many=True, read_only=True)
     payments = PatientPaymentDetailSerializer(source='patientpayment_set', many=True, read_only=True)
+    room_data = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
         fields = [
             'id', 'client', 'section', 'room', 'doctor', 'register_date',
-            'is_finished', 'finished_date', 'total_sum', 'total_remainder', 'services', 'payments'
+            'is_finished', 'finished_date', 'total_sum', 'total_remainder', 'services', 'payments', 'room_data'
         ]
+
+    def get_room_data(self, obj):
+        if obj.finished_date:
+            duration = obj.finished_date.date() - obj.register_date.date()
+        else:
+            duration = now().date() - obj.register_date.date()
+
+        days = duration.days + 1  # Include the starting day
+
+        # Calculate the total price
+        if obj.room and hasattr(obj.room, 'daily_rate'):
+            daily_rate = obj.room.daily_rate
+        else:
+            daily_rate = 0
+
+        total_sum = days * daily_rate
+
+        return {
+            "days": days,
+            "total_sum": total_sum
+        }

@@ -233,7 +233,6 @@ class PatientPaymentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 
-
 class ReportView(APIView):
     @swagger_auto_schema(
         manual_parameters=[

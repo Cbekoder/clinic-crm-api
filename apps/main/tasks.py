@@ -14,3 +14,7 @@ def update_patient_sums():
             patient.save()
 
     return f"Successfully updated {patients.count()} patients."
+
+
+if __name__ == "__main__":
+    update_patient_sums()

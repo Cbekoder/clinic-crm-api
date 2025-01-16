@@ -76,7 +76,7 @@ class Turn(BaseModel):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             today = date.today()
-            if self.doctor:
+            if self.doctor and self.doctor.room:
                 room = self.doctor.room
                 last_turn = Turn.objects.filter(
                     doctor__room=room,
@@ -98,12 +98,21 @@ class Turn(BaseModel):
             self.turn_num = last_turn.turn_num + 1 if last_turn else 1
 
             active_patient = self.client.patient_set.filter(is_finished=False).first()
-            if active_patient and self.service:
+            if active_patient and self.service and not self.pk:
                 PatientService(
                     patient=active_patient,
                     service=self.service,
                     price=self.price
                 ).save()
+
+            if self.complaint or self.diagnosis or self.analysis_result or self.prescription:
+                self.status = "closed"
+
+            if self.is_canceled:
+                if self.status != 'closed':
+                    self.status = "canceled"
+                else:
+                    raise ValidationError({"error": "This turn is already closed."})
 
             super().save(*args, **kwargs)
 
@@ -133,6 +142,8 @@ class Patient(BaseModel):
                 pk=self.pk).exists()
             if existing_patient:
                 raise ValidationError({"error": "This client already has an unfinished patient record."})
+        else:
+            self.finished_date = now()
 
         super().save(*args, **kwargs)
 

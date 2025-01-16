@@ -9,6 +9,7 @@ from .models import Client, Turn, Patient, PatientService, PatientPayment
 class ClientSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     updated_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = Client
         fields = '__all__'
@@ -20,10 +21,13 @@ class TurnGetSerializer(serializers.ModelSerializer):
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
+
     class Meta:
         model = Turn
-        fields = ['id', "client", "doctor", "service", "price", 'is_paid', "turn_num", 'appointment_time', "status", "created_at"]
+        fields = ['id', "client", "doctor", "service", "price", 'is_paid', "turn_num", 'appointment_time', "status",
+                  "created_at"]
         read_only_fields = ["turn_num", "created_at"]
+
 
 class TurnFullDetailSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
@@ -31,14 +35,17 @@ class TurnFullDetailSerializer(serializers.ModelSerializer):
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
+
     class Meta:
         model = Turn
-        fields = ['id', "client", "doctor", "service", "price", "turn_num", 'is_paid', "status", 'appointment_time', 'complaint', 'diagnosis', 'analysis_result', 'prescription', "created_at"]
+        fields = ['id', "client", "doctor", "service", "price", "turn_num", 'is_paid', "status", 'appointment_time',
+                  'complaint', 'diagnosis', 'analysis_result', 'prescription', "created_at"]
         read_only_fields = ["turn_num", "created_at"]
+
 
 class TurnPostSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", required=False, allow_null=True)
 
     class Meta:
         model = Turn
@@ -51,6 +58,7 @@ class TurnPostSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         # representation = super().to_representation(instance)
         return TurnGetSerializer(instance).data
+
 
 class TurnUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,6 +89,7 @@ class PatientSerializer(serializers.ModelSerializer):
     doctor = UserSimpleDetailSerializer()
     register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = Patient
         fields = [
@@ -88,9 +97,11 @@ class PatientSerializer(serializers.ModelSerializer):
             'is_finished', 'finished_date', 'total_sum', 'total_remainder'
         ]
 
+
 class PatientPostSerializer(serializers.ModelSerializer):
     register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = Patient
         fields = [
@@ -106,15 +117,18 @@ class PatientPostSerializer(serializers.ModelSerializer):
 
 class PatientServiceSerializer(serializers.ModelSerializer):
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = PatientService
         fields = ['id', 'patient', 'service', 'price', 'created_at']
         read_only_fields = ["created_at"]
 
+
 class PatientServiceDetailSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
     service = ServiceSerializer()
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = PatientService
         fields = ['id', 'patient', 'service', 'price', 'created_at']
@@ -123,14 +137,17 @@ class PatientServiceDetailSerializer(serializers.ModelSerializer):
 
 class PatientPaymentSerializer(serializers.ModelSerializer):
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = PatientPayment
         fields = ['id', 'patient', 'summa', 'description', 'created_at']
         read_only_fields = ["created_at"]
 
+
 class PatientPaymentDetailSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+
     class Meta:
         model = PatientPayment
         fields = ['id', 'patient', 'summa', 'description', 'created_at']

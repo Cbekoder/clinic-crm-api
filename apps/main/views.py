@@ -194,10 +194,36 @@ class PatientListCreateAPIView(ListCreateAPIView):
     serializer_class = PatientSerializer
     permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('start_date', openapi.IN_QUERY, description="Start date for the report (YYYY-MM-DD)",
+                              type=openapi.TYPE_STRING, format="date"),
+            openapi.Parameter(
+                'is_finished',
+                openapi.IN_QUERY,
+                description="Filter patients by their finished status (true or false)",
+                type=openapi.TYPE_BOOLEAN
+            )]
+
+    )
+    def get(self, request, *args, **kwargs):
+        is_finished = request.query_params.get('is_finished')
+        queryset = self.queryset
+
+        if is_finished is not None:
+            queryset = queryset.filter(is_finished=is_finished.lower() in ['true', '1', 't'])
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return PatientSerializer
         return PatientPostSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(is_finished=False)
+
 
 class DoctorPatientListAPIView(ListAPIView):
     queryset = Patient.objects.all()

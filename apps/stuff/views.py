@@ -1,7 +1,13 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
+from django.utils.dateparse import parse_date
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
-from .models import Section, Room, Service
-from .serializers import SectionSerializer, RoomSerializer, ServiceSerializer
+from .models import Section, Room, Service, Expense
+from .serializers import SectionSerializer, RoomSerializer, ServiceSerializer, ExpenseListSerializer, \
+    ExpenseRetrieveSerializer
 
 
 class SectionListCreateAPIView(ListCreateAPIView):
@@ -71,3 +77,56 @@ class ServiceDetailView(RetrieveUpdateDestroyAPIView):
         else:
             permission_classes = [IsCEO | IsAdmin]
         return [permission() for permission in permission_classes]
+
+
+class ExpensesListCreateView(ListCreateAPIView):
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseListSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['id', 'reason', 'description']
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+    def get_queryset(self):
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date:
+            if not parse_date(start_date):
+                raise ValidationError({"start_date": "Invalid date format. Use YYYY-MM-DD."})
+            self.queryset = self.queryset.filter(created_at__date__gte=start_date)
+
+        if end_date:
+            if not parse_date(end_date):
+                raise ValidationError({"end_date": "Invalid date format. Use YYYY-MM-DD."})
+            self.queryset = self.queryset.filter(created_at__date__lte=end_date)
+
+        return self.queryset
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'start_date', openapi.IN_QUERY,
+                description="Start date for filtering (YYYY-MM-DD)",
+                type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE
+            ),
+            openapi.Parameter(
+                'end_date', openapi.IN_QUERY,
+                description="End date for filtering (YYYY-MM-DD)",
+                type=openapi.TYPE_STRING, format=openapi.FORMAT_DATE
+            ),
+            openapi.Parameter(
+                'search',
+                openapi.IN_QUERY,
+                description="Search by expense colums: id, reason, description.",
+                type=openapi.TYPE_STRING
+            ),
+        ],
+        responses={200: ExpenseListSerializer(many=True)}
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class ExpenseDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseRetrieveSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]

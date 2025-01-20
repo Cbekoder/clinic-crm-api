@@ -81,6 +81,14 @@ class TurnCancelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This turn is already canceled.")
         return instance
 
+class CanceledTurnSerializer(serializers.ModelSerializer):
+    client = ClientSerializer()
+    service = ServiceSerializer()
+    doctor = UserSimpleDetailSerializer()
+    class Meta:
+        model = Turn
+        fields = ['id', 'client', 'service', 'doctor', 'price', 'turn_num', 'appointment_time', 'cancel_reason', 'cancel_refund']
+
 
 class PatientSerializer(serializers.ModelSerializer):
     client = ClientSerializer()
@@ -162,6 +170,8 @@ class PatientDetailSerializer(serializers.ModelSerializer):
     services = PatientServiceDetailSerializer(source='patientservice_set', many=True, read_only=True)
     payments = PatientPaymentDetailSerializer(source='patientpayment_set', many=True, read_only=True)
     room_data = serializers.SerializerMethodField()
+    register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
     class Meta:
         model = Patient

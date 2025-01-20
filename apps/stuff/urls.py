@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     SectionListCreateAPIView, SectionRetrieveUpdateDestroyAPIView,
-    RoomListCreateAPIView, RoomRetrieveUpdateDestroyAPIView, ServiceListCreateView, ServiceDetailView
+    RoomListCreateAPIView, RoomRetrieveUpdateDestroyAPIView, ServiceListCreateView, ServiceDetailView,
+    ExpensesListCreateView, ExpenseDetailView
 )
 
 urlpatterns = [
@@ -17,4 +18,7 @@ urlpatterns = [
     path('services/', ServiceListCreateView.as_view(), name='service-list-create'),
     path('services/<int:pk>/', ServiceDetailView.as_view(), name='service-detail'),
 
+    # Expense URLs
+    path('expenses/', ExpensesListCreateView.as_view(), name='expenses-list'),
+    path('expenses/<int:pk>/', ExpenseDetailView.as_view(), name='expenses-detail'),
 ]

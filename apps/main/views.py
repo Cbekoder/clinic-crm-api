@@ -18,7 +18,7 @@ from apps.users.permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
 from .models import Client, Turn, Patient, PatientService, PatientPayment
 from .serializers import ClientSerializer, TurnGetSerializer, TurnPostSerializer, TurnCancelSerializer, \
     PatientSerializer, PatientServiceSerializer, TurnUpdateSerializer, PatientPostSerializer, PatientDetailSerializer, \
-    PatientPaymentSerializer, TurnFullDetailSerializer
+    PatientPaymentSerializer, TurnFullDetailSerializer, CanceledTurnSerializer
 from ..stuff.models import Service
 from ..stuff.serializers import ServiceSerializer
 from ..users.models import User
@@ -177,6 +177,22 @@ class TurnCancelAPIView(UpdateAPIView):
             raise ValidationError("This turn is already canceled.")
         serializer.save()
 
+class TurnCanceledListAPIView(ListAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = CanceledTurnSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+    def get_queryset(self):
+        return self.queryset.filter(is_canceled=True)
+
+class TurnCanceledRetrieveAPIView(RetrieveAPIView):
+    queryset = Turn.objects.all()
+    serializer_class = CanceledTurnSerializer
+    permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+    def get_queryset(self):
+        return self.queryset.filter(is_canceled=True)
+
 class TurnFullDetailAPIView(ListAPIView):
     queryset = Turn.objects.all()
     serializer_class = TurnFullDetailSerializer
@@ -207,14 +223,7 @@ class PatientListCreateAPIView(ListCreateAPIView):
 
     )
     def get(self, request, *args, **kwargs):
-        is_finished = request.query_params.get('is_finished')
-        queryset = self.queryset
-
-        if is_finished is not None:
-            queryset = queryset.filter(is_finished=is_finished.lower() in ['true', '1', 't'])
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return super().get(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -222,7 +231,14 @@ class PatientListCreateAPIView(ListCreateAPIView):
         return PatientPostSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(is_finished=False)
+        is_finished = self.request.query_params.get('is_finished')
+
+        if is_finished is not None:
+            self.queryset.filter(is_finished=is_finished.lower() in ['true', '1', 't'])
+        else:
+            self.queryset.filter(is_finished=False)
+
+        return self.queryset
 
 
 class DoctorPatientListAPIView(ListAPIView):

@@ -46,3 +46,19 @@ class User(AbstractUser, BaseModel):
 
     def __str__(self):
         return self.username
+
+    def full_name(self):
+        return self.first_name + self.last_name
+
+
+class SalaryPayment(BaseModel):
+    staff = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.FloatField()
+
+    class Meta:
+        verbose_name = "Oylik "
+        verbose_name_plural = "Oyliklar "
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.staff.full_name()

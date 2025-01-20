@@ -8,10 +8,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .permissions import IsCEO, IsAdmin, IsDoctor, IsRegistrator
-from .models import User
+from .models import User, SalaryPayment
 from .filters import UserFilter
 from .serializers import UserDetailSerializer, UserPostSerializer, CustomTokenObtainPairSerializer, \
-    PasswordUpdateSerializer
+    PasswordUpdateSerializer, SalaryPaymentPostSerializer, SalaryPaymentGetSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -68,3 +68,23 @@ class PasswordUpdateView(APIView):
             user.save()
             return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SalaryPaymentListCreateView(ListCreateAPIView):
+    queryset = SalaryPayment.objects.all()
+    serializer_class = SalaryPaymentPostSerializer
+    permission_classes = [IsCEO | IsAdmin]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return SalaryPaymentGetSerializer
+        return SalaryPaymentPostSerializer
+
+class SalaryPaymentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = SalaryPayment.objects.all()
+    serializer_class = SalaryPaymentPostSerializer
+    permission_classes = [IsCEO | IsAdmin]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return SalaryPaymentGetSerializer
+        return SalaryPaymentPostSerializer

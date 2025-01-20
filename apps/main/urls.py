@@ -3,7 +3,8 @@ from .views import PatientListCreateAPIView, TurnListCreateAPIView, TurnRetrieve
     ClientListCreateAPIView, PatientRetrieveUpdateDestroyAPIView, PatientServiceRetrieveUpdateDestroyAPIView, \
     PatientServiceListCreateAPIView, ClientRetrieveUpdateDestroyAPIView, DoctorTurnUpdateAPIView, \
     PatientPaymentListCreateAPIView, PatientPaymentRetrieveUpdateDestroyAPIView, TurnFullDetailAPIView, ReportView, \
-    DoctorTurnListAPIView, TurnFullDetailRetrieveAPIView, DoctorPatientListAPIView
+    DoctorTurnListAPIView, TurnFullDetailRetrieveAPIView, DoctorPatientListAPIView, TurnCanceledListAPIView, \
+    TurnCanceledRetrieveAPIView
 
 urlpatterns = [
     # Client urls
@@ -18,6 +19,8 @@ urlpatterns = [
     path('turns/doctor/<int:pk>', DoctorTurnUpdateAPIView.as_view(), name='doctor-turn-update'),
     path('turns/doctor/', DoctorTurnListAPIView.as_view(), name='doctor-turn-list'),
     path('turns/cancel/<int:pk>', TurnCancelAPIView.as_view(), name='turn-cancel'),
+    path('turns/canceled/', TurnCanceledListAPIView.as_view(), name='turn-canceled_list'),
+    path('turns/canceled/<int:pk>', TurnCanceledRetrieveAPIView.as_view(), name='turn-canceled_detail'),
 
     # Pateint urls
     path('patients/', PatientListCreateAPIView.as_view(), name='patient-list-create'),

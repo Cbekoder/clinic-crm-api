@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
-from .models import User
+from .models import User, SalaryPayment
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -38,7 +38,6 @@ class UserSimpleDetailSerializer(serializers.ModelSerializer):
         ]
 
 class UserPostSerializer(serializers.ModelSerializer):
-    salary_or_kpi = serializers.FloatField(write_only=True)
 
     class Meta:
         model = User
@@ -46,7 +45,7 @@ class UserPostSerializer(serializers.ModelSerializer):
             'id', 'username', 'password', 'first_name', 'last_name', 'middle_name',
             'birth_date', 'gender', 'address', 'phone_number', 'extra_phone_number', 'balance',
             'status', 'employment_date', 'working_time',
-            'salary_or_kpi', 'role', 'job', 'room', 'date_joined'
+            'salary', 'kpi', 'role', 'job', 'room', 'date_joined'
         ]
         read_only_fields = ['balance', 'status', 'date_joined']
         extra_kwargs = {
@@ -59,15 +58,6 @@ class UserPostSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        salary_or_kpi = validated_data.pop('salary_or_kpi', None)
-        role = validated_data.get('role', 'other')
-
-        if salary_or_kpi is not None:
-            if role == 'doctor':
-                validated_data['kpi'] = salary_or_kpi
-            else:
-                validated_data['salary'] = salary_or_kpi
-
         password = validated_data.pop('password', None)
         user = User(**validated_data)
 
@@ -113,3 +103,18 @@ class PasswordUpdateSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("Current password is incorrect.")
         return value
+
+
+class SalaryPaymentPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SalaryPayment
+        fields = ['id', 'user', 'amount', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class SalaryPaymentGetSerializer(serializers.ModelSerializer):
+    user = UserSimpleDetailSerializer()
+    class Meta:
+        model = SalaryPayment
+        fields = ['id', 'user', 'amount', 'created_at']
+        read_only_fields = ['id', 'created_at']

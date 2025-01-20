@@ -108,13 +108,13 @@ class PasswordUpdateSerializer(serializers.Serializer):
 class SalaryPaymentPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalaryPayment
-        fields = ['id', 'user', 'amount', 'created_at']
+        fields = ['id', 'staff', 'amount', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 
 class SalaryPaymentGetSerializer(serializers.ModelSerializer):
-    user = UserSimpleDetailSerializer()
+    staff = UserSimpleDetailSerializer()
     class Meta:
         model = SalaryPayment
-        fields = ['id', 'user', 'amount', 'created_at']
+        fields = ['id', 'staff', 'amount', 'created_at']
         read_only_fields = ['id', 'created_at']

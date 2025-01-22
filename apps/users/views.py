@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -71,8 +72,10 @@ class PasswordUpdateView(APIView):
 
 class SalaryPaymentListCreateView(ListCreateAPIView):
     queryset = SalaryPayment.objects.all()
-    serializer_class = SalaryPaymentPostSerializer
     permission_classes = [IsCEO | IsAdmin]
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['staff__first_name', 'staff__last_name', 'staff__username']
+    filterset_fields = ['staff']
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

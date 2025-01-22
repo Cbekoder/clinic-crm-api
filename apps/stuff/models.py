@@ -22,6 +22,7 @@ class Room(BaseModel):
     all_seats = models.IntegerField(default=1)
     free_seats = models.IntegerField()
     seat_price = models.FloatField(validators=[MinValueValidator(0.0)])
+    for_patient = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Xona "

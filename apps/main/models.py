@@ -68,6 +68,7 @@ class Turn(BaseModel):
     class Meta:
         verbose_name = "Navbat"
         verbose_name_plural = "Navbatlar"
+        ordering = ['-appointment_time', 'turn_num']
 
     def __str__(self):
         return self.client.last_name
@@ -137,12 +138,17 @@ class Patient(BaseModel):
 
     def save(self, *args, **kwargs):
         if not self.is_finished:
-            existing_patient = Patient.objects.filter(client=self.client, is_finished=False).exclude(
-                pk=self.pk).exists()
-            if existing_patient:
-                raise ValidationError({"error": "This client already has an unfinished patient record."})
+            if not self.pk:
+                if Patient.objects.filter(client=self.client, is_finished=False).exists():
+                    raise ValidationError({"error": "This client already has an unfinished patient record."})
+                if self.room.free_seats > 0:
+                    self.room.free_seats -= 1
+                else:
+                    raise ValidationError({"error": "There are no free seats in this room."})
         else:
             self.finished_date = now()
+            self.room.free_seats += 1
+
 
         super().save(*args, **kwargs)
 

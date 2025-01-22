@@ -47,7 +47,7 @@ class UserPostSerializer(serializers.ModelSerializer):
             'status', 'employment_date', 'working_time',
             'salary', 'kpi', 'role', 'job', 'room', 'date_joined'
         ]
-        read_only_fields = ['balance', 'status', 'date_joined']
+        read_only_fields = ['balance', 'date_joined']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False}
         }
@@ -58,6 +58,7 @@ class UserPostSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        validated_data.pop('status', None)
         password = validated_data.pop('password', None)
         user = User(**validated_data)
 
@@ -106,6 +107,7 @@ class PasswordUpdateSerializer(serializers.Serializer):
 
 
 class SalaryPaymentPostSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = SalaryPayment
         fields = ['id', 'staff', 'amount', 'created_at']
@@ -114,6 +116,7 @@ class SalaryPaymentPostSerializer(serializers.ModelSerializer):
 
 class SalaryPaymentGetSerializer(serializers.ModelSerializer):
     staff = UserSimpleDetailSerializer()
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = SalaryPayment
         fields = ['id', 'staff', 'amount', 'created_at']

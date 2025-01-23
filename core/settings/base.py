@@ -199,7 +199,7 @@ CELERY_RESULT_BACKEND = env.str("CELERY_BROKER_URL", "redis://localhost:6379")
 
 CELERY_TIMEZONE = "Asia/Tashkent"
 # CELERY CONFIGURATION
-CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "redis://localhost:6379")
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env.str("CELERY_BROKER_URL", "redis://localhost:6379")
 CELERY_TIMEZONE = "Asia/Tashkent"
 CELERY_ACCEPT_CONTENT = ['json']

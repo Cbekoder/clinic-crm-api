@@ -64,6 +64,7 @@ class Turn(BaseModel):
     is_canceled = models.BooleanField(default=False)
     cancel_reason = models.TextField(null=True, blank=True)
     cancel_refund = models.FloatField(null=True, blank=True)
+    cancel_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Navbat"
@@ -97,24 +98,30 @@ class Turn(BaseModel):
 
             self.turn_num = last_turn.turn_num + 1 if last_turn else 1
 
+            if self.complaint or self.diagnosis or self.analysis_result or self.prescription:
+                self.status = "closed"
+                if self.doctor and self.doctor.kpi:
+                    self.doctor.balance += self.doctor.kpi
+                    self.doctor.kpi_balance += self.doctor.kpi
+                    self.doctor.save(update_fields=['balance', 'kpi_balance'])
+
+            if self.is_canceled:
+                if self.status != 'closed':
+                    self.status = "canceled"
+                    self.cancel_date = now()
+                else:
+                    raise ValidationError({"error": "This turn is already closed."})
+
+            super().save(*args, **kwargs)
+
             active_patient = self.client.patient_set.filter(is_finished=False).first()
             if active_patient and self.service and not self.pk:
                 PatientService(
                     patient=active_patient,
                     service=self.service,
-                    price=self.price
+                    price=self.price,
+                    turn=self.pk
                 ).save()
-
-            if self.complaint or self.diagnosis or self.analysis_result or self.prescription:
-                self.status = "closed"
-
-            if self.is_canceled:
-                if self.status != 'closed':
-                    self.status = "canceled"
-                else:
-                    raise ValidationError({"error": "This turn is already closed."})
-
-            super().save(*args, **kwargs)
 
 
 class Patient(BaseModel):
@@ -157,6 +164,7 @@ class PatientService(BaseModel):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
     price = models.FloatField()
+    turn = models.ForeignKey(Turn, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = "Bemor xizmat "

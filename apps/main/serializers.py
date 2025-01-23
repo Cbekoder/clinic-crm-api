@@ -1,23 +1,22 @@
-from rest_framework import serializers
-from rest_framework.serializers import DateTimeField
+from rest_framework.serializers import DateTimeField, ModelSerializer, ValidationError, SerializerMethodField
 from django.utils.timezone import now
 from apps.stuff.serializers import ServiceSerializer, SectionSerializer, RoomSerializer
 from apps.users.serializers import UserSimpleDetailSerializer
 from .models import Client, Turn, Patient, PatientService, PatientPayment
 
 
-class ClientSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    updated_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+class ClientSerializer(ModelSerializer):
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    updated_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
     class Meta:
         model = Client
         fields = '__all__'
 
 
-class TurnGetSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+class TurnGetSerializer(ModelSerializer):
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
@@ -29,9 +28,9 @@ class TurnGetSerializer(serializers.ModelSerializer):
         read_only_fields = ["turn_num", "created_at"]
 
 
-class TurnFullDetailSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+class TurnFullDetailSerializer(ModelSerializer):
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     client = ClientSerializer()
     doctor = UserSimpleDetailSerializer()
     service = ServiceSerializer()
@@ -43,9 +42,9 @@ class TurnFullDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ["turn_num", "created_at"]
 
 
-class TurnPostSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
-    appointment_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M", required=False, allow_null=True)
+class TurnPostSerializer(ModelSerializer):
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
+    appointment_time = DateTimeField(format="%d.%m.%Y %H:%M", required=False, allow_null=True)
 
     class Meta:
         model = Turn
@@ -60,13 +59,13 @@ class TurnPostSerializer(serializers.ModelSerializer):
         return TurnGetSerializer(instance).data
 
 
-class TurnUpdateSerializer(serializers.ModelSerializer):
+class TurnUpdateSerializer(ModelSerializer):
     class Meta:
         model = Turn
         fields = ['id', 'complaint', 'diagnosis', 'analysis_result', 'prescription']
 
 
-class TurnCancelSerializer(serializers.ModelSerializer):
+class TurnCancelSerializer(ModelSerializer):
     class Meta:
         model = Turn
         fields = ['cancel_reason', 'cancel_refund']
@@ -78,19 +77,20 @@ class TurnCancelSerializer(serializers.ModelSerializer):
             instance.cancel_refund = validated_data.get('cancel_refund', instance.cancel_refund)
             instance.save()
         else:
-            raise serializers.ValidationError("This turn is already canceled.")
+            raise ValidationError("This turn is already canceled.")
         return instance
 
-class CanceledTurnSerializer(serializers.ModelSerializer):
+class CanceledTurnSerializer(ModelSerializer):
     client = ClientSerializer()
     service = ServiceSerializer()
     doctor = UserSimpleDetailSerializer()
+    cancel_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = Turn
-        fields = ['id', 'client', 'service', 'doctor', 'price', 'turn_num', 'appointment_time', 'cancel_reason', 'cancel_refund']
+        fields = ['id', 'client', 'service', 'doctor', 'price', 'turn_num', 'appointment_time', 'cancel_reason', 'cancel_refund', 'cancel_date']
 
 
-class PatientSerializer(serializers.ModelSerializer):
+class PatientSerializer(ModelSerializer):
     client = ClientSerializer()
     section = SectionSerializer()
     room = RoomSerializer()
@@ -106,7 +106,7 @@ class PatientSerializer(serializers.ModelSerializer):
         ]
 
 
-class PatientPostSerializer(serializers.ModelSerializer):
+class PatientPostSerializer(ModelSerializer):
     register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
@@ -123,7 +123,7 @@ class PatientPostSerializer(serializers.ModelSerializer):
         return PatientSerializer(instance).data
 
 
-class PatientServiceSerializer(serializers.ModelSerializer):
+class PatientServiceSerializer(ModelSerializer):
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
     class Meta:
@@ -132,7 +132,7 @@ class PatientServiceSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
 
-class PatientServiceDetailSerializer(serializers.ModelSerializer):
+class PatientServiceDetailSerializer(ModelSerializer):
     patient = PatientSerializer()
     service = ServiceSerializer()
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
@@ -143,7 +143,7 @@ class PatientServiceDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
 
-class PatientPaymentSerializer(serializers.ModelSerializer):
+class PatientPaymentSerializer(ModelSerializer):
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
     class Meta:
@@ -152,7 +152,7 @@ class PatientPaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
 
-class PatientPaymentDetailSerializer(serializers.ModelSerializer):
+class PatientPaymentDetailSerializer(ModelSerializer):
     patient = PatientSerializer()
     created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
@@ -161,15 +161,25 @@ class PatientPaymentDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'patient', 'summa', 'description', 'created_at']
         read_only_fields = ["created_at"]
 
+class PatientServiceTurnDetailSerializer(ModelSerializer):
+    patient = PatientSerializer()
+    service = ServiceSerializer()
+    turn = TurnFullDetailSerializer()
+    created_at = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 
-class PatientDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientService
+        fields = ['id', 'patient', 'service', 'price', 'turn', 'created_at']
+        read_only_fields = ["created_at"]
+
+class PatientDetailSerializer(ModelSerializer):
     client = ClientSerializer()
     section = SectionSerializer()
     room = RoomSerializer()
     doctor = UserSimpleDetailSerializer()
-    services = PatientServiceDetailSerializer(source='patientservice_set', many=True, read_only=True)
+    services = PatientServiceTurnDetailSerializer(source='patientservice_set', many=True, read_only=True)
     payments = PatientPaymentDetailSerializer(source='patientpayment_set', many=True, read_only=True)
-    room_data = serializers.SerializerMethodField()
+    room_data = SerializerMethodField()
     register_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     finished_date = DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
 

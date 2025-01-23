@@ -33,9 +33,30 @@ class SectionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return [permission() for permission in permission_classes]
 
 class RoomListCreateAPIView(ListCreateAPIView):
-    queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    # permission_classes = [IsCEO | IsAdmin | IsDoctor | IsRegistrator]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                name="for_doctors",
+                in_=openapi.IN_QUERY,
+                description="Filter rooms by patient availability. Use `true` for patient rooms and `false` for others.",
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = Room.objects.all()
+        for_doctors = self.request.query_params.get('for_doctors', None)
+        if for_doctors is not None and for_doctors == "true":
+            queryset = queryset.filter(for_patient=False)
+        else:
+            queryset = queryset.filter(for_patient=True)
+        return queryset
 
     def get_permissions(self):
         if self.request.method == 'GET':

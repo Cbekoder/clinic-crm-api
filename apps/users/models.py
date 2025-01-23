@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from apps.common.models import BaseModel
+from apps.stuff.models import Room
 
 ROLE_CHOICES = (
     ('ceo', 'CEO'),
@@ -30,8 +31,9 @@ class User(AbstractUser, BaseModel):
     extra_phone_number = models.CharField(max_length=15, null=True, blank=True)
     salary = models.FloatField(null=True, blank=True)
     kpi = models.FloatField(null=True, blank=True)
+    kpi_balance = models.FloatField(default=0)
     balance = models.FloatField(default=0)
-    room = models.CharField(max_length=100, null=True, blank=True)
+    room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True, blank=True)
     job = models.CharField(max_length=100, null=True, blank=True)
     role = models.CharField(max_length=30, choices=ROLE_CHOICES, help_text="Role bo'lishi mumkin: 'ceo', 'admin', 'doctor', 'registrator' 'other'", default="other")
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, help_text="Status bo'lishi mumkin: 'active', 'inactive'", default="active")
@@ -62,3 +64,9 @@ class SalaryPayment(BaseModel):
 
     def __str__(self):
         return self.staff.full_name()
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.staff.balance -= self.amount
+            self.staff.save(update_fields=['balance'])
+        super().save(*args, **kwargs)

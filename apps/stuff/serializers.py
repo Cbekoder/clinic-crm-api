@@ -12,7 +12,7 @@ class RoomSerializer(ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ['id', 'section', 'section_name', 'number', 'all_seats', 'free_seats', 'seat_price']
+        fields = ['id', 'section', 'section_name', 'number', 'all_seats', 'free_seats', 'seat_price', 'for_patient']
 
 class ServiceSerializer(ModelSerializer):
     class Meta:

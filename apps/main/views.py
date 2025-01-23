@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView, ListAPIView, \
@@ -24,6 +25,9 @@ from ..stuff.serializers import ServiceSerializer
 from ..users.models import User
 from ..users.serializers import UserSimpleDetailSerializer
 
+
+def redirect_to_swagger(request):
+    return redirect("schema-swagger-ui")
 
 class ClientListCreateAPIView(ListCreateAPIView):
     queryset = Client.objects.all()

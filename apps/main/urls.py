@@ -4,9 +4,10 @@ from .views import PatientListCreateAPIView, TurnListCreateAPIView, TurnRetrieve
     PatientServiceListCreateAPIView, ClientRetrieveUpdateDestroyAPIView, DoctorTurnUpdateAPIView, \
     PatientPaymentListCreateAPIView, PatientPaymentRetrieveUpdateDestroyAPIView, TurnFullDetailAPIView, ReportView, \
     DoctorTurnListAPIView, TurnFullDetailRetrieveAPIView, DoctorPatientListAPIView, TurnCanceledListAPIView, \
-    TurnCanceledRetrieveAPIView
+    TurnCanceledRetrieveAPIView, redirect_to_swagger
 
 urlpatterns = [
+    path('', redirect_to_swagger, name='redirect_to_swagger'),
     # Client urls
     path('clients/', ClientListCreateAPIView.as_view(), name='patient_list_create'),
     path('clients/<int:pk>', ClientRetrieveUpdateDestroyAPIView.as_view(), name='patient-detail'),
